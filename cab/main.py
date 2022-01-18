@@ -69,6 +69,7 @@ def auth(message):
                 bot.send_message(message.chat.id, text="Отправьте код подтверждения с помощью команды /code код подтверждения")
                 bot.send_message(message.chat.id, text=auth_state)
             tg_requests.update({user.chat_id: tr})
+            print(tg_requests)
         else:
             bot.send_message(message.chat.id, text="Для начала отправьте свой контакт, чтобы я узнал ваш номер телефона")
 
@@ -77,11 +78,12 @@ def auth(message):
 def send_code(message):
     code = int(message.text.split(" ")[1])
     tr = tg_requests[message.chat.id]
+    print(tg_requests)
     tr.tg_class.send_code(code)
     auth_state = tr.tg_class.login(blocking=False)
+    bot.send_message(message.chat.id, text=auth_state)
     if auth_state == AuthorizationState.WAIT_PASSWORD:
         bot.send_message(message.chat.id, text="Отправьте облачный пароль с помощью команды /password 'пароль'")
-        bot.send_message(message.chat.id, text=auth_state)
 
 
 @bot.message_handler(commands=['password'])
