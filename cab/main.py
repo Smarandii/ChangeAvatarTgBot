@@ -127,7 +127,8 @@ def set_photo(message):
         else:
             bot.send_message(message.chat.id, text="Для начала необходимо пройти авторизацию! Используй команду /auth")
     except Exception as e:
-        print(e.args[0], e.args[1])
+        print(e.args)
+        bot.send_message(message.chat.id, text="Для начала необходимо пройти авторизацию! Используй команду /auth")
 
 
 bot.polling(none_stop=True)
