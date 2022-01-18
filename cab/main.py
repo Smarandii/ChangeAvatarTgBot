@@ -57,18 +57,22 @@ def auth(message):
     db = DBManager(session)
     with db:
         user = db.get_user_from_db(User(chat_id=message.chat.id))
-        tr = TgRequest(tg_class=Telegram(api_id=api_id,
-                                         api_hash=api_hash,
-                                         phone=user.phone,
-                                         database_encryption_key=database_encryption_key, ),
-                       data=None,
-                       user_id=user.chat_id)
-        auth_state = tr.tg_class.login()
-        if auth_state == AuthorizationState.WAIT_CODE:
-            bot.send_message(message.chat.id, text="Отправьте код подтверждения с помощью команды /code код подтверждения")
-        if auth_state == AuthorizationState.WAIT_PASSWORD:
-            bot.send_message(message.chat.id, text="Отправьте облачный пароль с помощью команды /password пароль")
-        tg_requests.update({user.chat_id: tr})
+        if user.phone is not None:
+            tr = TgRequest(tg_class=Telegram(api_id=api_id,
+                                             api_hash=api_hash,
+                                             phone=user.phone,
+                                             database_encryption_key=database_encryption_key, ),
+                           data=None,
+                           user_id=user.chat_id)
+            auth_state = tr.tg_class.login(blocking=False)
+            if auth_state == AuthorizationState.WAIT_CODE:
+                bot.send_message(message.chat.id, text="Отправьте код подтверждения с помощью команды /code код подтверждения")
+            if auth_state == AuthorizationState.WAIT_PASSWORD:
+                bot.send_message(message.chat.id, text="Отправьте облачный пароль с помощью команды /password пароль")
+            tg_requests.update({user.chat_id: tr})
+            print(tg_requests)
+        else:
+            bot.send_message(message.chat.id, text="Для начала отправьте свой контакт, чтобы я узнал ваш номер телефона")
 
 
 @bot.message_handler(commands=['code'])
@@ -76,7 +80,11 @@ def send_code(message):
     code = int(message.text.split(" ")[1])
     tr = tg_requests[message.chat.id]
     tr.tg_class.send_code(code)
-    auth_state = tr.tg_class.login()
+    auth_state = tr.tg_class.login(blocking=False)
+    if auth_state == AuthorizationState.WAIT_CODE:
+        bot.send_message(message.chat.id, text="Отправьте код подтверждения с помощью команды /code код подтверждения")
+    if auth_state == AuthorizationState.WAIT_PASSWORD:
+        bot.send_message(message.chat.id, text="Отправьте облачный пароль с помощью команды /password пароль")
     bot.send_message(message.chat.id, text={auth_state})
 
 
@@ -85,13 +93,14 @@ def send_password(message):
     password = int(message.text.split(" ")[1])
     tr = tg_requests[message.chat.id]
     tr.tg_class.send_password(password)
-    auth_state = tr.tg_class.login()
+    auth_state = tr.tg_class.login(blocking=False)
     bot.send_message(message.chat.id, text={auth_state})
 
 
 @bot.message_handler(content_types=["text"])
 def set_photo(message):
     try:
+        print(tg_requests[message.chat.id].tg_class.authorization_state)
         if tg_requests[message.chat.id].tg_class.authorization_state == AuthorizationState.READY:
             photo_path = join("avatars", f"{message.chat_id}{message.text}.jpg")
             if exists(photo_path):
@@ -118,7 +127,7 @@ def set_photo(message):
         else:
             bot.send_message(message.chat.id, text="Для начала необходимо пройти авторизацию! Используй команду /auth")
     except Exception as e:
-        print(e.args)
+        print(e.args[0], e.args[1])
 
 
 bot.polling(none_stop=True)
