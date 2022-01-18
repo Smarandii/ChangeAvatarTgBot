@@ -1,4 +1,4 @@
-from cab import bot, join, DBSession, User, DBManager, exists, check_photos, \
+from __init__ import bot, join, DBSession, User, DBManager, exists, check_photos, \
     TgRequest, Telegram, environ, dotenv, AuthorizationState
 tg_requests = {}
 
