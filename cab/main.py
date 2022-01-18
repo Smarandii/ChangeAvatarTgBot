@@ -1,5 +1,5 @@
 from __init__ import bot, join, DBSession, User, DBManager, exists, check_photos, \
-    TgRequest, Telegram, environ, dotenv, AuthorizationState
+    TgRequest, Telegram, AuthorizationState, api_id, api_hash, database_encryption_key
 tg_requests = {}
 
 
@@ -57,10 +57,10 @@ def auth(message):
     db = DBManager(session)
     with db:
         user = db.get_user_from_db(User(chat_id=message.chat.id))
-        tr = TgRequest(tg_class=Telegram(api_id=int(environ["api_id"]),
-                                         api_hash=environ["api_hash"],
+        tr = TgRequest(tg_class=Telegram(api_id=api_id,
+                                         api_hash=api_hash,
                                          phone=user.phone,
-                                         database_encryption_key=environ["database_encryption_key"], ),
+                                         database_encryption_key=database_encryption_key, ),
                        data=None,
                        user_id=user.chat_id)
         auth_state = tr.tg_class.login()
