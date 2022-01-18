@@ -67,10 +67,8 @@ def auth(message):
             auth_state = tr.tg_class.login(blocking=False)
             if auth_state == AuthorizationState.WAIT_CODE:
                 bot.send_message(message.chat.id, text="Отправьте код подтверждения с помощью команды /code код подтверждения")
-            if auth_state == AuthorizationState.WAIT_PASSWORD:
-                bot.send_message(message.chat.id, text="Отправьте облачный пароль с помощью команды /password пароль")
+                bot.send_message(message.chat.id, text=auth_state)
             tg_requests.update({user.chat_id: tr})
-            print(tg_requests)
         else:
             bot.send_message(message.chat.id, text="Для начала отправьте свой контакт, чтобы я узнал ваш номер телефона")
 
@@ -81,11 +79,9 @@ def send_code(message):
     tr = tg_requests[message.chat.id]
     tr.tg_class.send_code(code)
     auth_state = tr.tg_class.login(blocking=False)
-    if auth_state == AuthorizationState.WAIT_CODE:
-        bot.send_message(message.chat.id, text="Отправьте код подтверждения с помощью команды /code код подтверждения")
     if auth_state == AuthorizationState.WAIT_PASSWORD:
-        bot.send_message(message.chat.id, text="Отправьте облачный пароль с помощью команды /password пароль")
-    bot.send_message(message.chat.id, text={auth_state})
+        bot.send_message(message.chat.id, text="Отправьте облачный пароль с помощью команды /password 'пароль'")
+        bot.send_message(message.chat.id, text=auth_state)
 
 
 @bot.message_handler(commands=['password'])
@@ -100,7 +96,6 @@ def send_password(message):
 @bot.message_handler(content_types=["text"])
 def set_photo(message):
     try:
-        print(tg_requests[message.chat.id].tg_class.authorization_state)
         if tg_requests[message.chat.id].tg_class.authorization_state == AuthorizationState.READY:
             photo_path = join("avatars", f"{message.chat_id}{message.text}.jpg")
             if exists(photo_path):
@@ -127,8 +122,12 @@ def set_photo(message):
         else:
             bot.send_message(message.chat.id, text="Для начала необходимо пройти авторизацию! Используй команду /auth")
     except Exception as e:
-        print(e.args)
+        print(e)
         bot.send_message(message.chat.id, text="Для начала необходимо пройти авторизацию! Используй команду /auth")
 
 
-bot.polling(none_stop=True)
+while True:
+    try:
+        bot.polling(none_stop=True)
+    except Exception as e:
+        bot.send_message(231584958, text=e)
