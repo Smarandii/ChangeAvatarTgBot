@@ -14,7 +14,7 @@ api_hash = '1ade71901936c22b048639561a38b60e'
 database_encryption_key = 'changekey123'
 token = "5087706018:AAHYR8fUfvb_xWo5R9TPXf8ztiyAcE09pAQ"
 
-bot = telebot.TeleBot(token=environ["token"])
+bot = telebot.TeleBot(token=token)
 
 engine = create_engine(f'sqlite:///cab.db')
 
