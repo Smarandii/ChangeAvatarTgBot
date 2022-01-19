@@ -9,10 +9,10 @@ from os import environ
 # import dotenv
 # dotenv.load_dotenv('variables.env')
 
-api_id = 7250915
-api_hash = '1ade71901936c22b048639561a38b60e'
+api_id = 1111111
+api_hash = 'hash'
 database_encryption_key = 'changekey123'
-token = "5087706018:AAHYR8fUfvb_xWo5R9TPXf8ztiyAcE09pAQ"
+token = "token"
 
 bot = telebot.TeleBot(token=token)
 
