@@ -85,6 +85,7 @@ def send_code(message):
     bot.send_message(message.chat.id, text=auth_state)
     if auth_state == AuthorizationState.WAIT_PASSWORD:
         bot.send_message(message.chat.id, text="Отправьте облачный пароль с помощью команды /password 'пароль'")
+    tg_requests[message.chat.id] = tr
 
 
 @bot.message_handler(commands=['password'])
@@ -94,6 +95,13 @@ def send_password(message):
     tr.tg_class.send_password(password)
     auth_state = tr.tg_class.login(blocking=False)
     bot.send_message(message.chat.id, text={auth_state})
+    tg_requests[message.chat.id] = tr
+
+
+@bot.message_handler(commands=['restart'])
+def restart(message):
+    tr = tg_requests[message.chat.id]
+    tr.tg_class.stop()
 
 
 @bot.message_handler(content_types=["text"])
