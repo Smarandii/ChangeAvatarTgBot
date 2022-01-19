@@ -47,8 +47,8 @@ def get_contact(message):
     with db:
         user = User(chat_id=message.chat.id, phone=message.contact.phone_number)
         user = db.update_or_add(user)
-        bot.send_message(message.chat.id, text=f"Проверьте ваш номер телефона {user.phone} \n "
-                                               f"Чтобы пройти авторизацию, используйте команду /auth")
+        bot.send_message(message.chat.id, text=f"Проверьте ваш номер телефона {user.phone}. \n"
+                                               f"Если всё верно, используйте команду /auth")
 
 
 @bot.message_handler(commands=['auth'])
@@ -71,13 +71,14 @@ def auth(message):
             tg_requests.update({user.chat_id: tr})
             print(tg_requests)
         else:
-            bot.send_message(message.chat.id, text="Для начала отправьте свой контакт, чтобы я узнал ваш номер телефона")
+            bot.send_message(message.chat.id, text="Далее отправьте свой контакт, чтобы я узнал ваш номер телефона. Это нам понадобится в дальнейшем!")
 
 
 @bot.message_handler(commands=['code'])
 def send_code(message):
     code = int(message.text.split(" ")[1])
     tr = tg_requests[message.chat.id]
+    print(code)
     print(tg_requests)
     tr.tg_class.send_code(code)
     auth_state = tr.tg_class.login(blocking=False)
